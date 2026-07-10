@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>画像からPDFに変換</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>画像からPDFに変換</h1>
+    <label for="pdfUpload">画像ファイルを選択（複数可）</label>
+    <input type="file" id="pdfUpload" accept="image/jpeg, image/png, image/webp" title="画像ファイルを選択してください" multiple>
+
+    <div class="form-group">
+        <div class="form-item">
+            <label for="widthSelect">横幅:</label>
+            <select id="widthSelect">
+                <option value="800">800px</option>
+                <option value="1280" selected>1280px</option>
+                <option value="1600">1600px</option>
+                <option value="original">オリジナル</option>
+            </select>
+        </div>
+        <div class="form-item">
+              <label for="grayscaleSelect">カラー設定:</label>
+              <select id="grayscaleSelect">
+                  <option value="none" selected>グレースケールしない</option>
+                  <option value="all">すべての画像をグレースケール</option>
+                  <option value="afterFirst">2枚目以降をグレースケール</option>
+              </select>
+          </div>
+        <div class="form-item">
+            <input type="checkbox" id="jpgConversion" checked>
+            <label for="jpgConversion">Jpg化</label>
+        </div>
+        <div class="form-item">
+            <input type="checkbox" id="sortByName" checked>
+            <label for="sortByName">名前順に並び替え</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="form-item">
+            <label for="quality">画質:</label>
+            <input type="range" id="quality" min="0" max="100" value="70">
+            <span id="qualityValue">70</span>
+        </div>
+        <div class="form-item">
+            <input type="text" id="fileName" placeholder="ファイル名">
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button id="compressButton">圧縮する</button>
+        <button id="saveButton" disabled>保存する</button>
+    </div>
+    
+    <div id="sizeComparison">
+        <div>
+            圧縮前サイズ: <span id="originalSize">0.00MB (0.00KB)</span>
+        </div>
+        <div>
+            圧縮後サイズ: <span id="compressedSize">0.00MB (0.00KB)</span>
+        </div>
+    </div>
+    <div id="aspectRatioWarning"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pica/9.0.1/pica.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
