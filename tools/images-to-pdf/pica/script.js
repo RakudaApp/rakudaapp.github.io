@@ -82,19 +82,20 @@ document.getElementById('compressButton').addEventListener('click', async () => 
             }
 
             // 1. 元画像を等倍で描画するCanvas（Picaの入力ソース用）
-            // メモリ節約のため alpha: false を指定
             const srcCanvas = document.createElement('canvas');
-            const srcContext = srcCanvas.getContext('2d', { alpha: false });
+            // 【変更箇所】WebP等の透過エラーを防ぐため、{ alpha: false } を解除して通常のコンテキストにする
+            const srcContext = srcCanvas.getContext('2d');
             srcCanvas.width = originalWidth;
             srcCanvas.height = originalHeight;
             
-            // 背景を白で塗りつぶして透過情報を消す
+            // 背景を白で塗りつぶして透過情報を消す（この処理で安全に不透明化されます）
             srcContext.fillStyle = '#ffffff';
             srcContext.fillRect(0, 0, originalWidth, originalHeight);
             srcContext.drawImage(img, 0, 0, originalWidth, originalHeight);
 
             // 2. リサイズ後の画像を受け取るCanvas（Picaの出力先用）
             const destCanvas = document.createElement('canvas');
+            // 出力側は透過がないことが確定しているため、マシンスペック節約用に alpha: false を維持
             const destContext = destCanvas.getContext('2d', { alpha: false });
             destCanvas.width = destWidth;
             destCanvas.height = destHeight;
@@ -104,7 +105,6 @@ document.getElementById('compressButton').addEventListener('click', async () => 
             destContext.fillRect(0, 0, destWidth, destHeight);
 
             // 3. Picaによる高品質・低ノイズなリサイズを実行
-            // アルファチャンネルを計算させない（不透明化）オプションを付与
             await pica.resize(srcCanvas, destCanvas, {
                 unsharpAmount: 80,
                 unsharpRadius: 0.6,
