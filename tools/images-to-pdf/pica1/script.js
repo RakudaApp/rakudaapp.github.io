@@ -10,6 +10,8 @@ document.getElementById('compressButton').addEventListener('click', async () => 
     const fileInput = document.getElementById('pdfUpload');
     const widthSelect = document.getElementById('widthSelect');
     const selectedWidth = widthSelect.value;
+    const grayscaleMode = document.getElementById('grayscaleSelect').value; 
+    const jpgConversion = document.getElementById('jpgConversion').checked;
     const jpgConversion = document.getElementById('jpgConversion').checked;
     const quality = document.getElementById('quality').value / 100;
     const customFileName = document.getElementById('fileName').value.trim();
@@ -103,6 +105,15 @@ document.getElementById('compressButton').addEventListener('click', async () => 
                 alpha: false
             });
 
+            // 条件に応じてグレースケール化を実行
+            const shouldGrayscale = 
+                (grayscaleMode === 'all') || 
+                (grayscaleMode === 'afterFirst' && i >= 1); // ソート後のインデックス1（2枚目）以降
+
+            if (shouldGrayscale) {
+                convertToPureGrayscale(destCanvas);
+            }
+            
             // 指定フォーマットでBlob化
             const imageBlob = await new Promise((resolve) => {
                 destCanvas.toBlob(resolve, jpgConversion ? 'image/jpeg' : 'image/png', quality);
@@ -165,3 +176,26 @@ document.getElementById('compressButton').addEventListener('click', async () => 
         alert('処理中にエラーが発生しました。画像の形式などを確認してください。');
     }
 });
+function convertToPureGrayscale(canvas) {
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    const len = data.length;
+
+    for (let i = 0; i < len; i += 4) {
+        // 心理物理学的な輝度公式（ITU-R BT.601）を適用
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+
+        // RGBのすべてのチャンネルを同じ輝度値にする（色情報を完全に破棄）
+        data[i] = gray;     // R
+        data[i + 1] = gray; // G
+        data[i + 2] = gray; // B
+        // data[i + 3] (Alpha) は透過抹消（白背景化）済みのため変更不要
+    }
+
+    // 変更したピクセルデータをCanvasに書き戻す
+    ctx.putImageData(imageData, 0, 0);
+}
