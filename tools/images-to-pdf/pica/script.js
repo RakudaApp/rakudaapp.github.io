@@ -1,5 +1,5 @@
-// Picaのインスタンス化
-const pica = window.pica();
+// 【修正】Picaを正しく constructor (new) でインスタンス化
+const pica = new window.pica();
 
 // 画質スライダーの値を表示する
 document.getElementById('quality').addEventListener('input', (event) => {
@@ -76,36 +76,27 @@ document.getElementById('compressButton').addEventListener('click', async () => 
                 destHeight = destWidth * aspectRatio;
             }
 
-            // 【こだわり仕様】2枚目（インデックス1）の画像サイズを基準にする
+            // 【仕様】2枚目（インデックス1）の画像サイズを基準にする
             if (pageNum === 2) {
                 baseAspectRatio = originalHeight / originalWidth;
             }
 
-            // 1. 元画像を等倍で描画するCanvas（Picaの入力ソース用）
-            const srcCanvas = document.createElement('canvas');
-            // 【変更箇所】WebP等の透過エラーを防ぐため、{ alpha: false } を解除して通常のコンテキストにする
-            const srcContext = srcCanvas.getContext('2d');
-            srcCanvas.width = originalWidth;
-            srcCanvas.height = originalHeight;
-            
-            // 背景を白で塗りつぶして透過情報を消す（この処理で安全に不透明化されます）
-            srcContext.fillStyle = '#ffffff';
-            srcContext.fillRect(0, 0, originalWidth, originalHeight);
-            srcContext.drawImage(img, 0, 0, originalWidth, originalHeight);
-
-            // 2. リサイズ後の画像を受け取るCanvas（Picaの出力先用）
+            // 【修正】リサイズ後の画像を受け取るCanvas（Picaの出力先用）
             const destCanvas = document.createElement('canvas');
-            // 出力側は透過がないことが確定しているため、マシンスペック節約用に alpha: false を維持
-            const destContext = destCanvas.getContext('2d', { alpha: false });
+            // 先にサイズを決定する（エラー防止の鉄則順序）
             destCanvas.width = destWidth;
             destCanvas.height = destHeight;
+
+            // サイズ決定後にコンテキストを取得
+            const destContext = destCanvas.getContext('2d', { alpha: false });
             
-            // 出力側も白背景で初期化
+            // 出力側を白背景で初期化して透過を抹消
             destContext.fillStyle = '#ffffff';
             destContext.fillRect(0, 0, destWidth, destHeight);
 
-            // 3. Picaによる高品質・低ノイズなリサイズを実行
-            await pica.resize(srcCanvas, destCanvas, {
+            // 【修正】Picaによる高品質なリサイズを実行
+            // エラーを極限まで減らすため、imgオブジェクトから直接destCanvasへリサイズ
+            await pica.resize(img, destCanvas, {
                 unsharpAmount: 80,
                 unsharpRadius: 0.6,
                 unsharpThreshold: 2,
@@ -135,8 +126,6 @@ document.getElementById('compressButton').addEventListener('click', async () => 
             }
 
             // メモリ解放のためにCanvasの参照をクリア
-            srcCanvas.width = 0;
-            srcCanvas.height = 0;
             destCanvas.width = 0;
             destCanvas.height = 0;
         }
