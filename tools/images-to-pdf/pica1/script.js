@@ -11,8 +11,7 @@ document.getElementById('compressButton').addEventListener('click', async () => 
     const widthSelect = document.getElementById('widthSelect');
     const selectedWidth = widthSelect.value;
     const grayscaleMode = document.getElementById('grayscaleSelect').value; 
-    const jpgConversion = document.getElementById('jpgConversion').checked;
-    const jpgConversion = document.getElementById('jpgConversion').checked;
+    const jpgConversion = document.getElementById('jpgConversion').checked; // ★1行だけにしました
     const quality = document.getElementById('quality').value / 100;
     const customFileName = document.getElementById('fileName').value.trim();
 
