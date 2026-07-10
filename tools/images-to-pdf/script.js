@@ -17,6 +17,14 @@ document.getElementById('compressButton').addEventListener('click', async () => 
     }
 
     const files = Array.from(fileInput.files);
+
+    // ソートにチェックがあれば強制ソート（名前順晃順）
+    const sortByName = document.getElementById('sortByName').checked;
+    if (sortByName) {
+        files.sort((a, b) => {
+            return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        });
+    }
     
     // 全入力ファイルの合計サイズを計算
     let totalOriginalSize = 0;
